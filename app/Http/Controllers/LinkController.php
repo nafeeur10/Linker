@@ -17,6 +17,11 @@ class LinkController extends Controller
     {
         
     }
+
+    public function create() 
+    {
+        return view('Link.create');
+    }
     public function store(UrlSubmissionRequest $request)
     {
         $validatedData = $request->validated();
