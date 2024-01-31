@@ -1,0 +1,40 @@
+version: '3.8'
+
+services: 
+    nginx:
+        image: nginx:1.22.1
+        container_name: nginx-linker
+        restart: unless-stopped
+        ports:
+            - "8001:8001"
+        volumes: 
+            - ./src:/var/www/Linker
+            - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+        depends_on: 
+            - php
+            - mysql
+
+    mysql:
+        image: mysql:8.0.36
+        container_name: mysql-linker
+        restart: unless-stopped
+        #volumes: 
+        #    - ./mysql:/var/lib/mysql
+        environment: 
+            MYSQL_DATABASE: link
+            MYSQL_USER: mysql
+            MYSQL_PASSWORD: NrR@6307001
+            MYSQL_ROOT_PASSWORD: NrR@6307001
+    php:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+              user: nafeeur10
+              uid: 1000
+        container_name: php-linker
+        restart: unless-stopped
+        working_dir: /var/www/Linker
+        volumes: 
+            - ./src:/var/www/Linker
+
