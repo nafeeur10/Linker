@@ -1,7 +1,10 @@
 @extends('base')
 @section('title', 'Linker: Create')
 @section('content')
-<div class="mt-16 shadow-xd rounded">
+<div class="mt-16 shadow-xd rounded" x-data="getCreateData()">
+    <template x-if="showSuccessToast">
+        <x-success-toast />
+    </template>
     <div class="flex items-center">
         <div class="p-4">
             <h3 class="text-3xl font-bold">Link Form</h3>
@@ -18,7 +21,7 @@
             </a>
         </div>
     </div>
-    <div x-data="{ links: '' }" class="w-full mb-4 border border-gray-200 bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+    <div class="w-full mb-4 border border-gray-200 bg-gray-50">
         <div class="px-4 py-2 bg-white rounded-t-lg dark:bg-gray-800">
             <label for="link" class="sr-only">Your Links</label>
             <textarea x-model="links" rows="10" class="w-full px-0 text-sm text-gray-900 bg-white border-0 focus:ring-0" placeholder="Write your links here..." required></textarea>
@@ -34,14 +37,33 @@
 
 @push('scripts')
 <script>
-    function submitLinks() {
-        axios.post('/store', { links: JSON.stringify(this.links) })
-        .then(response => {
-            console.log('Message submitted successfully!');
-        })
-        .catch(error => {
-            console.error('Error submitting message:', error);
-        });
+    function getCreateData() {
+        return {
+            showSuccessToast: false,
+            links: [],
+            csrfToken: document.querySelector('meta[name=csrf-token]').content,
+            submitLinks() {
+                fetch('/store', { 
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': this.csrfToken
+                    },
+                    body: JSON.stringify({ links: this.links }),
+                })
+                .then(response => {
+                    this.showSuccessToast = true;
+                    setTimeout(() => {
+                        this.showSuccessToast = false
+                        window.location.href ="/"
+                    }, 2000)
+                })
+                .catch(error => {
+                    console.error('Error submitting message:', error);
+                });
+            }
+        }
     }
+    
 </script>
 @endpush

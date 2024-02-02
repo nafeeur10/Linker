@@ -17,7 +17,7 @@ class UrlSubmissionRequest extends FormRequest
     public function all($keys = null): array
     {
         $data = parent::all($keys);
-        $urlString = json_decode($data['links']);
+        $urlString = $data['links'];
         $urlArray = explode("\n", trim($urlString));
         $data['urls'] = $urlArray;
         $data['main_domains'] = $this->getMainDomains($urlArray);

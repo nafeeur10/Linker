@@ -38,7 +38,7 @@ abstract class Repository implements RepositoryInterface
         return $this->model->all();
     }
 
-    public function getCount() {
+    public function getCount(): int {
         return $this->model->count();
     }
 
@@ -50,6 +50,16 @@ abstract class Repository implements RepositoryInterface
     public function getModelClass(): string
     {
         return $this->modelClass;
+    }
+
+    public function searchWith($columnName, $searchTerm, $relation): Collection
+    {
+        return $this->model->where($columnName, 'like', "%$searchTerm%")->with($relation)->get();
+    }
+
+    public function search($columnName, $searchTerm): Collection
+    {
+        return $this->model->where($columnName, 'like', "%$searchTerm%")->get();
     }
 
     public function getAllWithRelationAndPaginaion($relation, $skip = 0, $take = 5)

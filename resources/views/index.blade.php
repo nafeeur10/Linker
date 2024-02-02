@@ -1,7 +1,7 @@
 @extends('base')
 @section('title', 'Linker')
 @section('content')
-<div class="relative overflow-x-auto shadow-xd rounded mt-16">
+<div class="relative overflow-x-auto shadow-xd rounded mt-16" x-data="getData()">
     <div class="flex items-center">
         <div class="p-4">
             <h3 class="text-3xl font-bold">Link List</h3>
@@ -18,7 +18,9 @@
             </a>
         </div>
     </div>
-    
+    <template x-if="showDeleteToast">
+        <x-delete-toast />
+    </template>
     <div class="flex items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900 pt-4 px-4">
         <label for="table-search" class="sr-only">Search</label>
         <div class="relative">
@@ -27,36 +29,17 @@
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
                 </svg>
             </div>
-            <input type="text" id="table-search-users" class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search for users">
-        </div>
-        <div x-data="{ isSortOpen: false }" class="relative">
-            <button 
-                x-on:click="isSortOpen = !isSortOpen" 
-                data-dropdown-toggle="dropdownAction" 
-                class="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" 
-                type="button"
+            <input 
+                type="text" 
+                id="table-search-links" 
+                class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500" 
+                placeholder="Search for Links"
+                x-model="searchQuery"
+                @input="debouncedSearch"
             >
-                <span class="sr-only">Action button</span>
-                Sort
-                <svg class="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
-                </svg>
-            </button>
-            
-            <div id="dropdownAction" x-show="isSortOpen" class="z-10 absolute right-0 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600">
-                <ul class="py-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownActionButton">
-                    <li>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Alphabetically A - Z</a>
-                    </li>
-                    <li>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Alphabetically Z - A</a>
-                    </li>
-                </ul>
-            </div>
         </div>
-        
     </div>
-    <div x-data="getData()">
+    <div>
         <table class="w-full text-sm text-left rtl:text-right text-gray-600 dark:text-gray-400">
             <x-link-table-header />
             <tbody x-init="fetchLinkData()">
@@ -71,7 +54,7 @@
                             </div>
                         </td>
                         <td class="px-6 py-4">
-                            <a href="#" class="font-medium text-red-600">Delete</a>
+                            <a x-on:click="deleteLink(link.id)" class="font-medium text-red-600 cursor-pointer">Delete</a>
                         </td>
                     </tr>
                 </template>
@@ -101,7 +84,8 @@
                 </li>
             </ul>
         </nav>
-        <script>
+    </div>
+    <script>
             function getData() {
                 return {
                     isLoading: false,
@@ -113,9 +97,14 @@
                     currentPage: 1,
                     totalPage: 1,
                     perPageItems: 5,
+                    searchQuery: '',
+                    showDeleteToast: false,
+                    searchTimeout: null,
                     fetchLinkData(page = 1) {
                         this.isLoading = true;
                         this.currentPage = page;
+                        this.showingFrom = ((page - 1) * this.perPageItems) + 1
+                        this.showingTo = (page * this.perPageItems)
                         fetch('/links?page=' + page)
                             .then((response) => response.json())
                             .then((json) => {
@@ -138,11 +127,46 @@
                             .catch(error => {
                                 console.log(error);
                             });
+                    },
+                    debouncedSearch() {
+                        clearTimeout(this.searchTimeout);
+                        this.searchTimeout = setTimeout(() => {
+                            if(this.searchQuery.length > 1)
+                            this.fetchSearchResults();
+                            else
+                            this.fetchLinkData();
+                        }, 500);
+                    },
+                    fetchSearchResults() {
+                        fetch('/search?query=' + this.searchQuery)
+                        .then((response) => response.json())
+                            .then((json) => {
+                                this.links = json.links
+                                console.log("Search: ", this.links);
+                            })
+                            .catch(error => {
+                                this.error = error.message;
+                                this.isLoading = false;
+                            });
+                    },
+                    deleteLink(id) {
+                        fetch('/delete?id=' + id)
+                            .then((response) => {
+                                this.showDeleteToast = true
+                                console.log(this.showDeleteToast);
+                                setTimeout(() => {
+                                    this.showDeleteToast = false
+                                    this.fetchLinkData(this.currentPage);
+                                }, 2000)
+                            })
+                            .catch(error => {
+                                this.error = error.message;
+                                this.isLoading = false;
+                            });
                     }
                 }
             }
         </script>
-    </div>
 </div>
 
 @endsection

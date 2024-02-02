@@ -32,7 +32,13 @@ class LinkController extends Controller
         return response()->json($this->urlRepository->getCount());
     }
 
-    public function create(Request $request) 
+    public function search(Request $request)
+    {
+        $links = $this->linkService->search($request->all());
+        return response()->json(['links' => $links]);
+    }
+
+    public function create() 
     {
         return view('Link.create');
     }
@@ -42,7 +48,14 @@ class LinkController extends Controller
         $validatedData = $request->validated();
         $resultDomains = $this->storeMainDomains($validatedData);
         $resultUrls = $this->storeUrls($validatedData);
-        return 'Success';
+        if($resultDomains && $resultUrls)
+        return response()->json(['message' => 'Job Successful']);
+    }
+
+    public function delete(Request $request)
+    {
+        $url = $this->urlRepository->getOneById($request->id);
+        $url->delete();
     }
 
     private function storeMainDomains($data)
