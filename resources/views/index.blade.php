@@ -56,53 +56,48 @@
         </div>
         
     </div>
-    <div >
+    <div x-data="getData()">
         <table class="w-full text-sm text-left rtl:text-right text-gray-600 dark:text-gray-400">
             <x-link-table-header />
-            <tbody x-data="getData()" x-init="fetchLinkData()">
+            <tbody x-init="fetchLinkData()">
                 <template x-for="link in links">
-                    <template x-for="url in link.urls">
-                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                <span x-text="link.domain"></span>
-                            </th>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center">
-                                    <span x-text="url.path"></span>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <a href="#" class="font-medium text-red-600">Delete</a>
-                            </td>
-                        </tr>
-                    </template>
+                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            <span x-text="link.domain.domain"></span>
+                        </th>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <span x-text="link.path"></span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <a href="#" class="font-medium text-red-600">Delete</a>
+                        </td>
+                    </tr>
                 </template>
             </tbody>
         </table>
         <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between p-4" aria-label="Table navigation">
-            <span class="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">Showing <span class="font-semibold text-gray-900 dark:text-white">1-10</span> of <span class="font-semibold text-gray-900 dark:text-white">1000</span></span>
+            <span x-init="fetchLinkCount()" class="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
+                Showing 
+                <span class="font-semibold text-gray-900 dark:text-white">
+                    <span x-text="showingFrom"></span>
+                    <span> - </span>
+                    <span x-text="showingTo"></span>
+                </span>
+                 of <span class="font-semibold text-gray-900 dark:text-white" x-text="linkCount"></span>
+            </span>
             <ul class="inline-flex -space-x-px rtl:space-x-reverse text-sm h-8">
                 <li>
-                    <a href="#" class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 ">Previous</a>
+                    <button x-on:click="fetchLinkData(currentPage > 1 ? currentPage - 1: currentPage)" class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 ">Previous</button>
                 </li>
+                <template x-for="(item, index) in totalPage">
+                    <li>
+                        <button x-on:click="fetchLinkData(index+1)" :class="{'bg-blue-50 text-blue-600': index+1 == currentPage}" class="flex items-center justify-center px-3 h-8 border border-gray-30 hover:bg-blue-100 hover:text-blue-700" x-text="index+1"></button>
+                    </li>
+                </template>
                 <li>
-                    <a href="#" class="flex items-center justify-center px-3 h-8 text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">3</a>
-                </li>
-                <li>
-                    <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 ">1</a>
-                </li>
-                <li>
-                    <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 ">2</a>
-                </li>
-                
-                <li>
-                    <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 ">4</a>
-                </li>
-                <li>
-                    <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 ">5</a>
-                </li>
-                <li>
-                    <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 ">Next</a>
+                    <button x-on:click="fetchLinkData(currentPage < totalPage ? currentPage + 1: currentPage)" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 ">Next</button>
                 </li>
             </ul>
         </nav>
@@ -111,10 +106,17 @@
                 return {
                     isLoading: false,
                     links: [],
+                    linkCount: 0,
+                    showingFrom: 0,
+                    showingTo: 5,
                     error: null,
-                    fetchLinkData() {
+                    currentPage: 1,
+                    totalPage: 1,
+                    perPageItems: 5,
+                    fetchLinkData(page = 1) {
                         this.isLoading = true;
-                        fetch('/links?page=1')
+                        this.currentPage = page;
+                        fetch('/links?page=' + page)
                             .then((response) => response.json())
                             .then((json) => {
                                 this.links = json.links
@@ -124,7 +126,19 @@
                                 this.error = error.message;
                                 this.isLoading = false;
                             });
-                    }  
+                    },
+                    fetchLinkCount() {
+                        fetch('/count')
+                            .then((response) => response.json())
+                            .then((json) => {
+                                this.linkCount = json;
+                                this.totalPage = Math.ceil(this.linkCount / this.perPageItems);
+                                console.log("Counter: ", json);
+                            })
+                            .catch(error => {
+                                console.log(error);
+                            });
+                    }
                 }
             }
         </script>

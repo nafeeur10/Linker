@@ -27,6 +27,11 @@ class LinkController extends Controller
         return response()->json(['links' => $links]);
     }
 
+    public function count()
+    {
+        return response()->json($this->urlRepository->getCount());
+    }
+
     public function create(Request $request) 
     {
         return view('Link.create');

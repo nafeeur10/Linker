@@ -38,6 +38,10 @@ abstract class Repository implements RepositoryInterface
         return $this->model->all();
     }
 
+    public function getCount() {
+        return $this->model->count();
+    }
+
     public function getFirstWhere(...$params): ?Model
     {
         return $this->model->firstWhere(...$params);
