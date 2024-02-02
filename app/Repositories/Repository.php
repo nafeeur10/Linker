@@ -47,4 +47,9 @@ abstract class Repository implements RepositoryInterface
     {
         return $this->modelClass;
     }
+
+    public function getAllWithRelationAndPaginaion($relation, $skip = 0, $take = 5)
+    {
+        return $this->model->with($relation)->skip($skip)->take($take)->get();
+    }
 }

@@ -15,6 +15,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () { return view('index');});
-
+Route::get('/links', [LinkController::class, 'index']);
 Route::get('/create', [LinkController::class, 'create']);
 Route::post('store', [LinkController::class, 'store']);
