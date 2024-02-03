@@ -41,14 +41,6 @@ search, and sort those data. The results are displayed in a paginated table.
  - Run the migration `php artisan migrate`
  - Run the queue: `php artisan queue:work`
 
-## Code of Conduct
+## Video of Assignment
 
 In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
