@@ -55,7 +55,8 @@
                     this.showSuccessToast = true;
                     setTimeout(() => {
                         this.showSuccessToast = false
-                        window.location.href ="/"
+                        this.links = ''
+                        //window.location.href ="/"
                     }, 2000)
                 })
                 .catch(error => {

@@ -62,6 +62,11 @@ abstract class Repository implements RepositoryInterface
         return $this->model->where($columnName, 'like', "%$searchTerm%")->get();
     }
 
+    public function sortLatestWith($relation): Collection
+    {
+        return $this->model->with($relation)->latest()->get();
+    }
+
     public function getAllWithRelationAndPaginaion($relation, $skip = 0, $take = 5)
     {
         return $this->model->with($relation)->skip($skip)->take($take)->get();

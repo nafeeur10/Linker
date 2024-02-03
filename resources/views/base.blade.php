@@ -15,8 +15,8 @@
                 font-family: 'Raleway', sans-serif;
             }
         </style>
-        @vite(['resources/js/app.js'])
-        @vite('resources/css/app.css')
+        <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
+        @vite('resources/js/app.js')
     </head>
     <body class="antialiased">
         <div class="relative sm:flex sm:justify-center sm:items-center min-h-screen bg-dots-darker bg-center bg-gray-100 dark:bg-dots-lighter dark:bg-gray-900 selection:bg-red-500 selection:text-white">
@@ -29,5 +29,16 @@
             </div>
         </div>
         @stack('scripts')
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        boxShadow: {
+                            'xd': '0 -1px 3px -1px rgba(0, 0, 0, 0.1), 0 2px 6px 2px rgba(0, 0, 0, 0.1)',
+                        },
+                    }
+                }
+            }
+        </script>
     </body>
 </html>

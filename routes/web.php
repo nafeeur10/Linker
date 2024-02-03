@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () { return view('index');});
 Route::get('/count', [LinkController::class, 'count']);
+Route::get('/sort', [LinkController::class, 'sort']);
 Route::get('/search', [LinkController::class, 'search']);
 Route::get('/delete', [LinkController::class, 'delete']);
 Route::get('/links', [LinkController::class, 'index']);

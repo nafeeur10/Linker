@@ -38,6 +38,12 @@ class LinkController extends Controller
         return response()->json(['links' => $links]);
     }
 
+    public function sort(Request $request)
+    {
+        $links = $this->linkService->sort($request->all());
+        return response()->json(['links' => $links]);
+    }
+
     public function create() 
     {
         return view('Link.create');
